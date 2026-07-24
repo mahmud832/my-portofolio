@@ -1,4 +1,4 @@
-portofolio pyton.
+portofolio pyton dan website
 halo saya mahmud
 repository ini berisi hasil belajar python saya. list projek 
 - kalkulator
