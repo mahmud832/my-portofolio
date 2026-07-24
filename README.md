@@ -1,7 +1,6 @@
 portofolio pyton.
 halo saya mahmud
-repository ini berisi hasil belajar python saya
-projek
+repository ini berisi hasil belajar python saya. list projek 
 - kalkulator
 - game rpg
 - batu gunting kertas
