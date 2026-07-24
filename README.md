@@ -1,4 +1,4 @@
-portofolio pyton
+portofolio pyton.
 halo saya mahmud
 repository ini berisi hasil belajar python saya
 projek
