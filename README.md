@@ -7,4 +7,6 @@ repository ini berisi hasil belajar python saya. list projek
 - to do list
 - lirik lagu
 - program door prise
+- latihan  buat website
+- website umkm
 - terima kasih sudah berkunjung
