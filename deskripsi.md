@@ -13,8 +13,6 @@ Repository ini berisi kumpulan project Python yang saya kerjakan selama proses b
 - 🎁 Program Door Prize
 - 🔢 Tebak Angka
 - 🔐 Password Generator
-- 🌡️ Konverter Suhu
-- 💱 Konverter Mata Uang
 - 🎓 Sistem Nilai Mahasiswa
 - 🛒 Kasir Sederhana
 - 📦 Inventory Barang
