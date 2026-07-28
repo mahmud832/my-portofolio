@@ -1,4 +1,4 @@
-# Python Portfolio
+# Python dan website Portfolio 2026
 
 Halo, saya Mahmud.
 
@@ -10,7 +10,6 @@ Repository ini berisi kumpulan project Python yang saya kerjakan selama proses b
 - 🎮 Game RPG
 - ✂️ Batu Gunting Kertas
 - ✅ To Do List
-- 🎵 Lirik Lagu
 - 🎁 Program Door Prize
 - 🔢 Tebak Angka
 - 🔐 Password Generator
@@ -27,7 +26,7 @@ Repository ini berisi kumpulan project Python yang saya kerjakan selama proses b
 
 ## 🌐 Website
 
-- Website Latihan HTML & CSS
+- Website personal
 - Website UMKM
 
 ## 🚀 Tujuan
