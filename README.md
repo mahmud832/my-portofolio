@@ -24,8 +24,16 @@ Repository ini berisi kumpulan project Python yang saya kerjakan selama proses b
 
 ## 🌐 Website
 
-- Website personal
-- Website UMKM
+1. Website personal
+2. Website UMKM
+3. Company Profile Website
+4. Website Cafe / Coffee Shop
+5. Website Travel Agency 
+6. Website Hotel 
+7. Website Gym / Fitness Center 
+8. Website Sekolah 
+9. Website E-Commerce Sederhana
+
 
 ## 🚀 Tujuan
 
