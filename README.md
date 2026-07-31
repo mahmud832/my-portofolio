@@ -37,6 +37,6 @@ Repository ini berisi kumpulan project Python yang saya kerjakan selama proses b
 
 ## 🚀 Tujuan
 
-Repository ini dibuat sebagai dokumentasi proses belajar saya di bidang pemrograman Python dan sebagai portofolio pengembangan diri.
+Repository ini dibuat sebagai dokumentasi proses belajar saya di bidang pemrograman Python dan website sebagai portofolio pengembangan diri.
 
 Terima kasih telah berkunjung.
