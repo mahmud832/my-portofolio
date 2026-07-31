@@ -1,22 +1,12 @@
-const darkModeBtn = document.getElementById("darkModeBtn");
+// Smooth Scroll
+document.querySelectorAll("nav a").forEach(link => {
+    link.addEventListener("click", function(e){
+        e.preventDefault();
 
-// Cek apakah sebelumnya dark mode aktif
-if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-    darkModeBtn.textContent = "☀️";
-}
+        const tujuan = document.querySelector(this.getAttribute("href"));
 
-// Saat tombol diklik
-darkModeBtn.addEventListener("click", function () {
-
-    document.body.classList.toggle("dark-mode");
-
-    if (document.body.classList.contains("dark-mode")) {
-        darkModeBtn.textContent = "☀️";
-        localStorage.setItem("theme", "dark");
-    } else {
-        darkModeBtn.textContent = "🌙";
-        localStorage.setItem("theme", "light");
-    }
-
+        tujuan.scrollIntoView({
+            behavior: "smooth"
+        });
+    });
 });
