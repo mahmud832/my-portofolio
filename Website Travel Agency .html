@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARUS — Ekspedisi Kepulauan Nusantara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-900:#0B1D26;
+    --ink-800:#122C38;
+    --ink-700:#1B3F4D;
+    --parchment-100:#F4EEDD;
+    --parchment-200:#E8DCBE;
+    --ochre-500:#B9793B;
+    --ochre-400:#CE9257;
+    --teal-500:#4F8479;
+    --teal-300:#8FB7AC;
+    --text-light:#F4EEDD;
+    --text-dark:#132029;
+    --line-soft:rgba(244,238,221,0.16);
+    --line-soft-dark:rgba(19,32,41,0.15);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  body{
+    background:var(--ink-900);
+    color:var(--text-light);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+
+  h1,h2,h3,.display{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+  }
+
+  .mono{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0.02em;
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  ::selection{background:var(--ochre-500);color:var(--ink-900);}
+
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
+    outline:2px solid var(--ochre-400);
+    outline-offset:3px;
+  }
+
+  /* ---------- NAV ---------- */
+  header.site{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:100;
+    padding:22px 0;
+    background:linear-gradient(to bottom, rgba(11,29,38,0.92), rgba(11,29,38,0));
+    backdrop-filter:blur(2px);
+  }
+  header.site .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.35rem;
+    letter-spacing:0.04em;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .logo span{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.6rem;
+    font-weight:400;
+    color:var(--teal-300);
+    letter-spacing:0.14em;
+  }
+  nav.links{
+    display:flex;
+    gap:34px;
+    font-size:0.88rem;
+  }
+  nav.links a{
+    opacity:0.82;
+    transition:opacity 0.2s;
+    position:relative;
+  }
+  nav.links a:hover{opacity:1;}
+  .nav-cta{
+    border:1px solid var(--line-soft);
+    padding:9px 18px;
+    border-radius:2px;
+    font-size:0.82rem;
+    transition:background 0.2s, border-color 0.2s;
+  }
+  .nav-cta:hover{background:var(--ochre-500);border-color:var(--ochre-500);}
+  .menu-toggle{display:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    padding-top:90px;
+    overflow:hidden;
+  }
+  .hero-chart{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    opacity:0.9;
+  }
+  .hero-chart svg{width:100%;height:100%;}
+  .hero-content{
+    position:relative;
+    z-index:2;
+    max-width:640px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.75rem;
+    color:var(--teal-300);
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    margin-bottom:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:26px;height:1px;
+    background:var(--teal-300);
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 5.6vw, 4.4rem);
+    color:var(--parchment-100);
+    margin-bottom:26px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    font-weight:400;
+    color:var(--ochre-400);
+  }
+  .hero p.lede{
+    font-size:1.08rem;
+    max-width:480px;
+    color:var(--parchment-200);
+    opacity:0.88;
+    margin-bottom:38px;
+  }
+  .hero-actions{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    flex-wrap:wrap;
+  }
+  .btn-primary{
+    background:var(--ochre-500);
+    color:var(--ink-900);
+    padding:15px 30px;
+    font-size:0.92rem;
+    font-weight:500;
+    border-radius:2px;
+    display:inline-block;
+    transition:background 0.2s, transform 0.2s;
+    border:1px solid var(--ochre-500);
+  }
+  .btn-primary:hover{background:var(--ochre-400);transform:translateY(-1px);}
+  .hero-actions .scroll-hint{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.78rem;
+    color:var(--parchment-200);
+    opacity:0.65;
+  }
+
+  .coord-tag{
+    position:absolute;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    color:var(--teal-300);
+    opacity:0.85;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .coord-tag .dot{
+    width:5px;height:5px;border-radius:50%;background:var(--ochre-400);
+    margin-bottom:4px;
+  }
+
+  /* ---------- SECTION GENERIC ---------- */
+  section{
+    padding:120px 0;
+    position:relative;
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:40px;
+    margin-bottom:64px;
+    flex-wrap:wrap;
+  }
+  .section-head .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.75rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    opacity:0.6;
+    margin-bottom:14px;
+    display:block;
+  }
+  .section-head h2{
+    font-size:clamp(1.8rem,3.4vw,2.6rem);
+  }
+  .section-head .desc{
+    max-width:340px;
+    font-size:0.95rem;
+    opacity:0.75;
+  }
+
+  /* ---------- PHILOSOPHY (light) ---------- */
+  .philosophy{
+    background:var(--parchment-100);
+    color:var(--text-dark);
+  }
+  .philosophy .section-head .desc{color:var(--text-dark);}
+  .principles{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line-soft-dark);
+    border:1px solid var(--line-soft-dark);
+  }
+  .principle{
+    background:var(--parchment-100);
+    padding:38px 34px;
+  }
+  .principle .mark{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:1.6rem;
+    color:var(--ochre-500);
+    margin-bottom:18px;
+    display:block;
+  }
+  .principle h3{
+    font-size:1.15rem;
+    margin-bottom:12px;
+    font-weight:500;
+  }
+  .principle p{
+    font-size:0.92rem;
+    opacity:0.72;
+    line-height:1.65;
+  }
+
+  /* ---------- EXPEDITIONS (dark, logbook) ---------- */
+  .expeditions{background:var(--ink-900);}
+  .log-list{
+    border-top:1px solid var(--line-soft);
+  }
+  .log-entry{
+    display:grid;
+    grid-template-columns:110px 1fr 200px 140px 24px;
+    align-items:center;
+    gap:24px;
+    padding:30px 0;
+    border-bottom:1px solid var(--line-soft);
+    transition:background 0.25s;
+  }
+  .log-entry:hover{background:rgba(244,238,221,0.03);}
+  .log-entry .idx{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.78rem;
+    color:var(--teal-300);
+    opacity:0.85;
+  }
+  .log-entry .name h3{
+    font-size:1.35rem;
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .log-entry .name p{
+    font-size:0.85rem;
+    opacity:0.62;
+    max-width:420px;
+  }
+  .log-entry .coords{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.76rem;
+    color:var(--parchment-200);
+    opacity:0.7;
+    line-height:1.6;
+  }
+  .log-entry .meta{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.76rem;
+    text-align:right;
+    opacity:0.7;
+  }
+  .log-entry .arrow{
+    text-align:right;
+    color:var(--ochre-400);
+    font-size:1.1rem;
+    transition:transform 0.25s;
+  }
+  .log-entry:hover .arrow{transform:translateX(4px);}
+
+  /* ---------- DESTINATIONS ---------- */
+  .destinations{background:var(--ink-800);}
+  .dest-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+  }
+  .dest-card{
+    aspect-ratio:3/4;
+    position:relative;
+    border-radius:2px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:20px;
+    border:1px solid var(--line-soft);
+  }
+  .dest-card .label{
+    position:relative;z-index:2;
+  }
+  .dest-card .label .place{
+    font-family:'Fraunces',serif;
+    font-size:1.2rem;
+    margin-bottom:4px;
+  }
+  .dest-card .label .coord{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.68rem;
+    opacity:0.75;
+  }
+  .dest-card::before{
+    content:"";
+    position:absolute;inset:0;
+    z-index:1;
+    background:linear-gradient(180deg, rgba(11,29,38,0) 40%, rgba(11,29,38,0.85) 100%);
+  }
+  .dest-card .art{position:absolute;inset:0;z-index:0;}
+
+  /* ---------- PROCESS ---------- */
+  .process{background:var(--parchment-100);color:var(--text-dark);}
+  .process .section-head .desc{color:var(--text-dark);}
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:36px;
+  }
+  .step .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.85rem;
+    color:var(--ochre-500);
+    margin-bottom:16px;
+    display:block;
+  }
+  .step h3{
+    font-size:1.08rem;
+    margin-bottom:10px;
+    font-weight:500;
+  }
+  .step p{
+    font-size:0.88rem;
+    opacity:0.7;
+  }
+
+  /* ---------- JOURNAL / LOGBOOK QUOTES ---------- */
+  .journal{background:var(--ink-900);}
+  .journal-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line-soft);
+    border:1px solid var(--line-soft);
+  }
+  .journal-entry{
+    background:var(--ink-900);
+    padding:36px 32px;
+  }
+  .journal-entry .stamp{
+    display:flex;
+    justify-content:space-between;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.68rem;
+    opacity:0.55;
+    margin-bottom:22px;
+  }
+  .journal-entry p.quote{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:1.08rem;
+    line-height:1.55;
+    color:var(--parchment-100);
+    margin-bottom:20px;
+  }
+  .journal-entry .who{
+    font-size:0.8rem;
+    opacity:0.6;
+  }
+
+  /* ---------- BOOK / CONTACT ---------- */
+  .book{
+    background:var(--ink-800);
+    position:relative;
+  }
+  .book-inner{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:80px;
+  }
+  .book-copy h2{
+    font-size:clamp(1.9rem,3.6vw,2.7rem);
+    margin-bottom:20px;
+  }
+  .book-copy p{
+    font-size:0.95rem;
+    opacity:0.72;
+    max-width:400px;
+    margin-bottom:32px;
+  }
+  .book-detail{
+    display:flex;
+    gap:14px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.82rem;
+    opacity:0.75;
+    margin-bottom:10px;
+  }
+  form.chart-form{
+    display:grid;
+    gap:18px;
+  }
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+  label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    opacity:0.6;
+    margin-bottom:8px;
+  }
+  input,textarea,select{
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--line-soft);
+    color:var(--text-light);
+    font-family:'Inter',sans-serif;
+    font-size:0.95rem;
+    padding:10px 2px;
+  }
+  input::placeholder,textarea::placeholder{color:var(--parchment-200);opacity:0.4;}
+  textarea{resize:vertical;min-height:70px;}
+  select{
+    color:var(--text-light);
+  }
+  select option{color:var(--text-dark);}
+  .submit-row{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-top:8px;
+  }
+  button.submit{
+    background:var(--ochre-500);
+    color:var(--ink-900);
+    border:1px solid var(--ochre-500);
+    padding:14px 28px;
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    font-size:0.9rem;
+    border-radius:2px;
+    cursor:pointer;
+    transition:background 0.2s;
+  }
+  button.submit:hover{background:var(--ochre-400);}
+  .submit-note{font-size:0.76rem;opacity:0.5;font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:50px 0 40px;
+    border-top:1px solid var(--line-soft);
+    background:var(--ink-900);
+  }
+  footer .wrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+  }
+  footer .foot-links{
+    display:flex;
+    gap:28px;
+    font-size:0.82rem;
+    opacity:0.7;
+  }
+  footer .mono{font-size:0.72rem;opacity:0.45;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:920px){
+    nav.links{display:none;}
+    .principles{grid-template-columns:1fr;}
+    .dest-grid{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:repeat(2,1fr);row-gap:40px;}
+    .journal-grid{grid-template-columns:1fr;}
+    .book-inner{grid-template-columns:1fr;gap:50px;}
+    .log-entry{grid-template-columns:60px 1fr;row-gap:8px;}
+    .log-entry .coords,.log-entry .meta{grid-column:2;text-align:left;}
+    .log-entry .arrow{display:none;}
+    .field-row{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    .dest-grid{grid-template-columns:1fr;}
+    section{padding:80px 0;}
+    .wrap{padding:0 22px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="logo">ARUS <span>EKSPEDISI KEPULAUAN</span></div>
+    <nav class="links">
+      <a href="#ekspedisi">Rute</a>
+      <a href="#destinasi">Destinasi</a>
+      <a href="#proses">Proses</a>
+      <a href="#jurnal">Jurnal</a>
+    </nav>
+    <a href="#pesan" class="nav-cta">Susun Perjalanan</a>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-chart" aria-hidden="true">
+    <svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <style>
+          .contour{fill:none;stroke:#F4EEDD;stroke-opacity:0.07;stroke-width:1;}
+          .island{fill:#1B3F4D;stroke:#4F8479;stroke-opacity:0.35;stroke-width:1;}
+          .route{fill:none;stroke:#B9793B;stroke-width:1.6;stroke-dasharray:6 7;opacity:0.85;}
+        </style>
+      </defs>
+
+      <!-- depth contours -->
+      <path class="contour" d="M -50,150 Q 400,80 800,180 T 1450,140"/>
+      <path class="contour" d="M -50,230 Q 420,160 800,260 T 1450,220"/>
+      <path class="contour" d="M -50,600 Q 380,540 780,630 T 1450,590"/>
+      <path class="contour" d="M -50,680 Q 400,630 800,700 T 1450,660"/>
+      <path class="contour" d="M -50,760 Q 420,720 820,780 T 1450,740"/>
+
+      <!-- island shapes -->
+      <path class="island" d="M 860,300 C 900,280 960,290 980,320 C 1010,340 1000,380 960,390 C 920,400 870,390 850,360 C 835,335 840,315 860,300 Z"/>
+      <path class="island" d="M 1080,420 C 1120,405 1160,420 1170,450 C 1180,480 1150,505 1110,500 C 1080,495 1060,470 1065,445 C 1068,432 1072,425 1080,420 Z"/>
+      <path class="island" d="M 950,520 C 990,505 1030,515 1040,545 C 1050,575 1015,600 975,595 C 945,590 930,565 935,540 C 938,528 942,525 950,520 Z"/>
+      <path class="island" d="M 720,480 C 750,465 790,475 800,500 C 812,528 785,552 750,548 C 725,545 710,525 712,505 C 713,495 715,488 720,480 Z"/>
+
+      <!-- route -->
+      <path class="route" d="M 740,505 L 955,545 L 1105,455 L 930,340"/>
+
+      <!-- markers -->
+      <circle cx="740" cy="505" r="4" fill="#CE9257"/>
+      <circle cx="955" cy="545" r="4" fill="#CE9257"/>
+      <circle cx="1105" cy="455" r="4" fill="#CE9257"/>
+      <circle cx="930" cy="340" r="4" fill="#CE9257"/>
+
+      <!-- compass rose -->
+      <g transform="translate(200,700)" opacity="0.5">
+        <circle r="46" fill="none" stroke="#F4EEDD" stroke-opacity="0.3"/>
+        <line x1="0" y1="-46" x2="0" y2="46" stroke="#F4EEDD" stroke-opacity="0.25"/>
+        <line x1="-46" y1="0" x2="46" y2="0" stroke="#F4EEDD" stroke-opacity="0.25"/>
+        <path d="M0,-46 L6,-8 L0,0 L-6,-8 Z" fill="#B9793B"/>
+        <text x="0" y="-56" fill="#F4EEDD" font-family="IBM Plex Mono" font-size="11" text-anchor="middle" opacity="0.6">U</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="wrap">
+    <div class="hero-content">
+      <div class="eyebrow">Biro Perjalanan Ekspedisi — Sejak 2016</div>
+      <h1>Rute yang <em>belum</em><br>ada di peta wisata.</h1>
+      <p class="lede">ARUS merancang ekspedisi kecil menyusuri selat, gunung api, dan terumbu di ujung timur Nusantara — dipandu nakhoda dan pemandu lokal yang tahu jalur yang tak tertulis di buku panduan mana pun.</p>
+      <div class="hero-actions">
+        <a href="#ekspedisi" class="btn-primary">Lihat Rute Ekspedisi</a>
+        <span class="scroll-hint">04 rute aktif — musim 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="coord-tag" style="bottom:60px; right:6%;">
+    <span class="dot"></span>
+    8°29'S, 119°25'E<br>PERAIRAN KOMODO
+  </div>
+</section>
+
+<!-- ================= PHILOSOPHY ================= -->
+<section class="philosophy" id="filosofi">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">Cara Kami Merancang Ekspedisi</span>
+        <h2>Tiga aturan yang tidak<br>kami tawar.</h2>
+      </div>
+      <p class="desc">Setiap rute ARUS dirancang ulang untuk tiap kelompok — bukan diambil dari katalog paket massal.</p>
+    </div>
+    <div class="principles">
+      <div class="principle">
+        <span class="mark">01</span>
+        <h3>Kapal &amp; nakhoda setempat</h3>
+        <p>Kami bermitra dengan nakhoda dan komunitas di tiap pulau singgah, bukan armada milik agen sendiri. Uang perjalanan Anda mengalir ke tempat singgahnya kapal.</p>
+      </div>
+      <div class="principle">
+        <span class="mark">02</span>
+        <h3>Kelompok kecil, jadwal luwes</h3>
+        <p>Maksimum 8 peserta per rute. Cuaca dan air pasang menentukan jadwal harian — bukan jam tangan kami.</p>
+      </div>
+      <div class="principle">
+        <span class="mark">03</span>
+        <h3>Rute lambat, singgah lama</h3>
+        <p>Kami memilih tinggal tiga hari di satu teluk ketimbang singgah sejam di sepuluh titik. Perjalanan menyusuri, bukan mengejar daftar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EXPEDITIONS ================= -->
+<section class="expeditions" id="ekspedisi">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">Buku Log — Rute Aktif</span>
+        <h2>Empat jalur, empat musim.</h2>
+      </div>
+      <p class="desc" style="color:var(--parchment-200);">Setiap rute dibatasi jumlah keberangkatan per tahun untuk menjaga tempat tetap sepi.</p>
+    </div>
+
+    <div class="log-list">
+      <div class="log-entry">
+        <span class="idx mono">RA–01</span>
+        <div class="name">
+          <h3>Lingkar Terumbu Raja Ampat</h3>
+          <p>Menyusuri Wayag hingga Misool dengan kapal kayu phinisi, menyelam pagi dan senja.</p>
+        </div>
+        <div class="coords mono">0°14'S, 130°31'E<br>8 hari berlayar</div>
+        <div class="meta mono">Okt – Apr<br>Sedang</div>
+        <div class="arrow">→</div>
+      </div>
+
+      <div class="log-entry">
+        <span class="idx mono">KF–02</span>
+        <div class="name">
+          <h3>Jalur Selam Komodo &amp; Flores</h3>
+          <p>Dari Labuan Bajo menyusuri Selat Komodo hingga perairan Alor, singgah di desa nelayan.</p>
+        </div>
+        <div class="coords mono">8°33'S, 119°53'E<br>6 hari berlayar</div>
+        <div class="meta mono">Mei – Sep<br>Sedang–Sulit</div>
+        <div class="arrow">→</div>
+      </div>
+
+      <div class="log-entry">
+        <span class="idx mono">IB–03</span>
+        <div class="name">
+          <h3>Garis Gunung Ijen–Bromo</h3>
+          <p>Mendaki kawah biru Ijen dini hari, menyusuri kaldera Bromo dan ladang belerang Tengger.</p>
+        </div>
+        <div class="coords mono">7°56'S, 114°14'E<br>5 hari darat</div>
+        <div class="meta mono">Apr – Nov<br>Sulit</div>
+        <div class="arrow">→</div>
+      </div>
+
+      <div class="log-entry">
+        <span class="idx mono">SW–04</span>
+        <div class="name">
+          <h3>Pesisir Liar Sumba</h3>
+          <p>Menyusuri pantai selatan Sumba yang belum ramai, singgah di kampung adat dan sabana kering.</p>
+        </div>
+        <div class="coords mono">9°39'S, 119°26'E<br>7 hari darat &amp; laut</div>
+        <div class="meta mono">Jun – Okt<br>Ringan–Sedang</div>
+        <div class="arrow">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DESTINATIONS ================= -->
+<section class="destinations" id="destinasi">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">Titik Singgah</span>
+        <h2>Beberapa tempat<br>yang sering kami tuju.</h2>
+      </div>
+      <p class="desc" style="color:var(--parchment-200);">Bukan daftar lengkap — hanya titik yang paling sering muncul di buku log kami.</p>
+    </div>
+    <div class="dest-grid">
+      <div class="dest-card" style="background:linear-gradient(160deg,#1B3F4D,#0B1D26);">
+        <div class="art"></div>
+        <div class="label">
+          <div class="place">Wayag, Raja Ampat</div>
+          <div class="coord mono">0°12'S, 130°01'E</div>
+        </div>
+      </div>
+      <div class="dest-card" style="background:linear-gradient(160deg,#4F8479,#122C38);">
+        <div class="art"></div>
+        <div class="label">
+          <div class="place">Pulau Kelor, Komodo</div>
+          <div class="coord mono">8°34'S, 119°45'E</div>
+        </div>
+      </div>
+      <div class="dest-card" style="background:linear-gradient(160deg,#B9793B,#1B3F4D);">
+        <div class="art"></div>
+        <div class="label">
+          <div class="place">Kawah Ijen</div>
+          <div class="coord mono">8°03'S, 114°14'E</div>
+        </div>
+      </div>
+      <div class="dest-card" style="background:linear-gradient(160deg,#8FB7AC,#0B1D26);">
+        <div class="art"></div>
+        <div class="label">
+          <div class="place">Pantai Marosi, Sumba</div>
+          <div class="coord mono">9°42'S, 119°15'E</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROCESS ================= -->
+<section class="process" id="proses">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">Dari Percakapan ke Pelabuhan</span>
+        <h2>Empat langkah menyusun rute.</h2>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="num mono">01</span>
+        <h3>Konsultasi awal</h3>
+        <p>Ceritakan musim, jumlah rombongan, dan ritme perjalanan yang Anda inginkan.</p>
+      </div>
+      <div class="step">
+        <span class="num mono">02</span>
+        <h3>Rancang rute</h3>
+        <p>Kami susun jalur, kapal, dan pemandu yang sesuai — lengkap dengan alternatif cuaca.</p>
+      </div>
+      <div class="step">
+        <span class="num mono">03</span>
+        <h3>Kunci logistik</h3>
+        <p>Konfirmasi kapal, penginapan singgah, dan izin kawasan konservasi bila diperlukan.</p>
+      </div>
+      <div class="step">
+        <span class="num mono">04</span>
+        <h3>Berangkat</h3>
+        <p>Anda tiba di titik kumpul; sisanya nakhoda dan pemandu yang mengurus.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= JOURNAL ================= -->
+<section class="journal" id="jurnal">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">Catatan dari Peserta</span>
+        <h2>Cuplikan buku log bersama.</h2>
+      </div>
+    </div>
+    <div class="journal-grid">
+      <div class="journal-entry">
+        <div class="stamp"><span>RA–01</span><span>MAR 2026</span></div>
+        <p class="quote">"Kami berhenti menyelam karena arus, lalu nakhoda malah mengajak memancing sore itu. Rencana berubah, tapi itu justru bagian terbaiknya."</p>
+        <div class="who mono">— Peserta, rombongan 6 orang</div>
+      </div>
+      <div class="journal-entry">
+        <div class="stamp"><span>IB–03</span><span>JUL 2025</span></div>
+        <p class="quote">"Naik jam dua pagi terasa berat, sampai kawah birunya kelihatan dari kejauhan. Pemandunya tahu persis kapan cahaya itu muncul."</p>
+        <div class="who mono">— Peserta, rombongan 4 orang</div>
+      </div>
+      <div class="journal-entry">
+        <div class="stamp"><span>SW–04</span><span>SEP 2025</span></div>
+        <p class="quote">"Tiga malam di kampung adat, bukan satu. Baru terasa waktunya cukup untuk benar-benar ngobrol, bukan sekadar lewat."</p>
+        <div class="who mono">— Peserta, rombongan 2 orang</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BOOK ================= -->
+<section class="book" id="pesan">
+  <div class="wrap book-inner">
+    <div class="book-copy">
+      <span class="tag mono" style="opacity:0.6;font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;display:block;margin-bottom:14px;">Susun Perjalanan</span>
+      <h2>Ceritakan rute yang<br>Anda bayangkan.</h2>
+      <p>Isi catatan singkat di sebelah kanan — tim kami membalas dalam 2 hari kerja dengan rancangan awal rute dan perkiraan biaya.</p>
+      <div class="book-detail"><span>SUREL</span><span>rencana@arus-ekspedisi.id</span></div>
+      <div class="book-detail"><span>BASIS</span><span>Labuan Bajo, NTT</span></div>
+      <div class="book-detail"><span>JAM</span><span>Senin–Jumat, 09.00–17.00 WITA</span></div>
+    </div>
+    <form class="chart-form" onsubmit="event.preventDefault();">
+      <div class="field-row">
+        <div>
+          <label for="nama">Nama</label>
+          <input id="nama" type="text" placeholder="Nama lengkap">
+        </div>
+        <div>
+          <label for="email">Surel</label>
+          <input id="email" type="email" placeholder="nama@email.com">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label for="rute">Rute yang diminati</label>
+          <select id="rute">
+            <option>Lingkar Terumbu Raja Ampat</option>
+            <option>Jalur Selam Komodo &amp; Flores</option>
+            <option>Garis Gunung Ijen–Bromo</option>
+            <option>Pesisir Liar Sumba</option>
+            <option>Belum yakin</option>
+          </select>
+        </div>
+        <div>
+          <label for="jumlah">Jumlah peserta</label>
+          <input id="jumlah" type="number" placeholder="2" min="1">
+        </div>
+      </div>
+      <div>
+        <label for="pesan">Catatan</label>
+        <textarea id="pesan" placeholder="Musim yang diinginkan, minat khusus, atau pertanyaan lain..."></textarea>
+      </div>
+      <div class="submit-row">
+        <button type="submit" class="submit">Kirim Catatan</button>
+        <span class="submit-note">Balasan dalam 2 hari kerja</span>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo" style="font-size:1.1rem;">ARUS</div>
+    <div class="foot-links">
+      <a href="#ekspedisi">Rute</a>
+      <a href="#destinasi">Destinasi</a>
+      <a href="#pesan">Kontak</a>
+    </div>
+    <span class="mono">© 2026 ARUS EKSPEDISI KEPULAUAN — LABUAN BAJO, ID</span>
+  </div>
+</footer>
+
+</body>
+</html>
