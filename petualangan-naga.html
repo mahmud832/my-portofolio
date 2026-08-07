@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Petualangan Sang Penakluk Naga</title>
+<style>
+  :root{ --bg1:#ff6ec4; --bg2:#7873f5; --bg3:#4ade80; --panel: rgba(255,255,255,0.94); }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; min-height:100%; overflow:auto;
+    font-family:'Trebuchet MS','Segoe UI',sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    background-size:300% 300%; animation:grad 14s ease infinite;
+    display:flex; align-items:flex-start; justify-content:center; padding:16px 0;
+  }
+  @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  #app{ width:700px; max-width:96vw; background:rgba(0,0,0,0.15); border-radius:20px; padding:14px; box-shadow:0 20px 50px rgba(0,0,0,0.3); position:relative; }
+  h1{color:#fff; text-align:center; margin:4px 0 8px; text-shadow:0 3px 10px rgba(0,0,0,0.35); font-size:24px;}
+  #topRow{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  #areaLabel{color:#fff; font-weight:bold; font-size:13px; text-shadow:0 2px 6px rgba(0,0,0,0.3);}
+  #ctrlBtns button{padding:6px 10px; font-size:12px; margin-left:4px;}
+  #hud{ display:flex; justify-content:space-between; align-items:center; background:var(--panel); border-radius:14px; padding:9px 14px; margin-bottom:8px; font-size:13px; font-weight:bold; color:#333; flex-wrap:wrap; gap:6px; }
+  .bar-wrap{display:flex; align-items:center; gap:5px;}
+  .bar{width:80px; height:11px; background:#eee; border-radius:6px; overflow:hidden; border:1px solid #ccc;}
+  .bar-fill{height:100%; transition:width 0.25s ease;}
+  .hp-fill{background:linear-gradient(90deg,#f87171,#ef4444);}
+  .mp-fill{background:linear-gradient(90deg,#60a5fa,#3b82f6);}
+  #msgLog{ background:var(--panel); border-radius:12px; padding:7px 14px; margin-bottom:8px; font-size:12.5px; color:#444; min-height:18px; font-style:italic; }
+  canvas{ display:block; margin:0 auto; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.25); background:#8fd694; }
+  #controls-hint{ text-align:center; color:#fff; font-size:11.5px; margin-top:8px; opacity:0.85; text-shadow:0 1px 4px rgba(0,0,0,0.3); }
+  .overlay{ position:absolute; inset:0; border-radius:20px; background:rgba(20,10,40,0.55); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; flex-direction:column; padding:16px; text-align:center; z-index:30; }
+  .card{ background:var(--panel); border-radius:18px; padding:22px 26px; max-width:440px; max-height:86vh; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.35); }
+  .card h2{margin-top:0; color:#3b2a5e;}
+  .card p{color:#444; line-height:1.55; font-size:13.5px; white-space:pre-line;}
+  button{ background:linear-gradient(135deg,#7873f5,#ff6ec4); color:#fff; border:none; padding:11px 22px; font-size:14px; font-weight:bold; border-radius:999px; cursor:pointer; margin:5px 4px 0; box-shadow:0 6px 16px rgba(0,0,0,0.25); transition:transform .12s ease; }
+  button:hover{transform:translateY(-2px);}
+  button:active{transform:translateY(0) scale(.97);}
+  button:disabled{opacity:0.4; cursor:not-allowed; transform:none;}
+  button.secondary{ background:linear-gradient(135deg,#94a3b8,#64748b); }
+  #battleOverlay .enemyBox{ display:flex; align-items:center; gap:10px; margin:6px 0; justify-content:center; }
+  #battleLog{ background:#fff; border-radius:10px; padding:7px 11px; margin:8px 0; font-size:12.5px; color:#333; max-height:66px; overflow-y:auto; text-align:left; }
+  .actionRow{display:flex; flex-wrap:wrap; justify-content:center; gap:6px;}
+  .emoji-big{font-size:40px;}
+  .shopItem{ display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:10px; padding:8px 12px; margin:6px 0; font-size:13px; }
+  .shopItem button{margin:0;}
+  .charGrid{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px;}
+  .charCard{background:#fff; border-radius:14px; padding:14px; width:140px; cursor:pointer; border:3px solid transparent; transition:transform .12s ease, border-color .12s ease;}
+  .charCard:hover{transform:translateY(-3px); border-color:#7873f5;}
+  .charCard .emoji-big{font-size:36px; display:block;}
+  .charCard h3{margin:6px 0 4px; font-size:14px; color:#3b2a5e;}
+  .charCard p{font-size:11px; margin:0; color:#555; white-space:normal;}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>⚔️ Petualangan Sang Penakluk Naga</h1>
+  <div id="topRow">
+    <div id="areaLabel">📍 Desa Awal</div>
+    <div id="ctrlBtns">
+      <button class="secondary" id="soundBtn">🔊 Suara</button>
+      <button class="secondary" id="saveBtn">💾 Simpan</button>
+      <button class="secondary" id="loadBtn">📂 Muat</button>
+    </div>
+  </div>
+
+  <div id="hud">
+    <div>👤 Lv.<span id="lvl">1</span> <span id="charLabel"></span></div>
+    <div class="bar-wrap">HP <div class="bar"><div id="hpFill" class="bar-fill hp-fill" style="width:100%"></div></div> <span id="hpText">30/30</span></div>
+    <div class="bar-wrap">MP <div class="bar"><div id="mpFill" class="bar-fill mp-fill" style="width:100%"></div></div> <span id="mpText">10/10</span></div>
+    <div>💰 <span id="gold">10</span></div>
+    <div>🧪 <span id="potions">2</span></div>
+    <div>🗡️ <span id="weaponName">Pedang Kayu</span></div>
+  </div>
+  <div id="msgLog">Selamat datang, Pengembara! Gunakan panah / WASD untuk bergerak.</div>
+
+  <canvas id="mapCanvas" width="576" height="384"></canvas>
+  <div id="controls-hint">⬆️⬇️⬅️➡️ / WASD bergerak • jalan ke musuh untuk bertarung • dekati NPC (🧔🧙‍♀️🧓💂🧚) untuk bicara • 🌀 pintu antar wilayah</div>
+
+  <!-- START -->
+  <div class="overlay" id="startOverlay" style="display:flex;">
+    <div class="card">
+      <h2>🐉 Kegelapan Menyelimuti Kerajaan</h2>
+      <p>Naga Kegelapan bangkit dari sarangnya jauh di timur dan mengirim para monsternya menyebar dari Hutan Terlarang hingga Gua Kegelapan. Sebagai penakluk terakhir, jelajahi desa, hutan, dan gua — kumpulkan emas, tingkatkan senjatamu, bicara dengan penduduk yang kau temui, dan akhirnya taklukkan sang naga di sarangnya!</p>
+      <button id="newGameBtn">Mulai Baru</button>
+      <button class="secondary" id="continueBtn">Lanjutkan Permainan</button>
+    </div>
+  </div>
+
+  <!-- CHARACTER SELECT -->
+  <div class="overlay" id="charSelectOverlay">
+    <div class="card">
+      <h2>Pilih Karaktermu</h2>
+      <p>Setiap karakter punya gaya bertarung yang berbeda. Pilih yang paling cocok dengan gayamu!</p>
+      <div class="charGrid" id="charGrid"></div>
+    </div>
+  </div>
+
+  <!-- DIALOG -->
+  <div class="overlay" id="dialogOverlay">
+    <div class="card">
+      <h2 id="dialogName">NPC</h2>
+      <p id="dialogText"></p>
+      <button id="dialogCloseBtn">Tutup</button>
+    </div>
+  </div>
+
+  <!-- BATTLE -->
+  <div class="overlay" id="battleOverlay">
+    <div class="card" style="width:320px;">
+      <h2 id="battleTitle">Pertarungan!</h2>
+      <div class="enemyBox">
+        <div class="emoji-big" id="enemyEmoji">👹</div>
+        <div style="text-align:left;">
+          <div id="enemyName" style="font-weight:bold;">Goblin</div>
+          <div class="bar"><div id="enemyHpFill" class="bar-fill hp-fill" style="width:100%"></div></div>
+          <div id="enemyHpText" style="font-size:12px;">15/15</div>
+        </div>
+      </div>
+      <div id="battleLog">Musuh muncul!</div>
+      <div class="actionRow">
+        <button id="btnAttack">⚔️ Serang</button>
+        <button id="btnSkill">🔥 Bola Api (8 MP)</button>
+        <button id="btnItem">🧪 Ramuan</button>
+        <button id="btnRun">🏃 Kabur</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POTION SHOP -->
+  <div class="overlay" id="potionShopOverlay">
+    <div class="card">
+      <h2>🧙‍♀️ Peramu Rania</h2>
+      <p>"Ramuan segar buatan sendiri, memulihkan 15 HP. 8 keping emas per botol!"</p>
+      <p>Emas: <b id="pShopGold">0</b> &nbsp;|&nbsp; Ramuan: <b id="pShopPotions">0</b></p>
+      <button id="buyPotionBtn">Beli Ramuan (8💰)</button>
+      <button class="secondary" id="closePotionShopBtn">Tutup</button>
+    </div>
+  </div>
+
+  <!-- WEAPON SHOP -->
+  <div class="overlay" id="weaponShopOverlay">
+    <div class="card">
+      <h2>🧔 Pandai Besi Ardan</h2>
+      <p>"Butuh senjata lebih tajam? Aku punya beberapa pilihan."</p>
+      <p>Emas: <b id="wShopGold">0</b> &nbsp;|&nbsp; Senjata saat ini: <b id="wShopCurrent">Pedang Kayu</b></p>
+      <div id="weaponList"></div>
+      <button class="secondary" id="closeWeaponShopBtn">Tutup</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="overlay" id="gameOverOverlay">
+    <div class="card">
+      <h2>💀 Kamu Kalah...</h2>
+      <p>Perjalananmu terhenti di sini. Tapi seorang penakluk sejati tidak pernah menyerah!</p>
+      <button id="retryBtn">Coba Lagi</button>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div class="overlay" id="winOverlay">
+    <div class="card">
+      <h2>🎉 Naga Kegelapan Dikalahkan!</h2>
+      <p>Kerajaan aman kembali berkat keberanianmu. Kamu menyelesaikan petualangan sebagai <b id="finalLvl">Level 1</b> dengan <b id="finalGold">0</b> emas dan senjata <b id="finalWeapon">Pedang Kayu</b>!</p>
+      <button id="playAgainBtn">Main Lagi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const COLS=18, ROWS=12, TS=32;
+  const canvas=document.getElementById('mapCanvas');
+  const ctx=canvas.getContext('2d');
+
+  const TILE={GRASS:0,TREE:1,WATER:2,TALLGRASS:3,FLOOR:4,CAVEGRASS:5,ROCK:6,PORTAL:7};
+  const tileColor={
+    [TILE.GRASS]:'#7fd88f', [TILE.TREE]:'#2f6b3a', [TILE.WATER]:'#4fa8e0',
+    [TILE.TALLGRASS]:'#5cc26b', [TILE.FLOOR]:'#e9d9ad', [TILE.CAVEGRASS]:'#8b7bd8',
+    [TILE.ROCK]:'#4b4256', [TILE.PORTAL]:'#fef08a'
+  };
+
+  function rand(a,b){return Math.random()*(b-a)+a;}
+  function setRect(tiles,x1,y1,x2,y2,t){for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++) if(tiles[y]&&tiles[y][x]!==undefined) tiles[y][x]=t;}
+  function borderGrid(wallTile){
+    const m=[];
+    for(let y=0;y<ROWS;y++){ const row=[]; for(let x=0;x<COLS;x++){ row.push((x===0||x===COLS-1||y===0||y===ROWS-1)?wallTile:TILE.GRASS); } m.push(row); }
+    return m;
+  }
+
+  // ---------------- CHARACTERS ----------------
+  const CHARACTERS=[
+    {id:'knight', name:'Ksatria Baja', emoji:'🤺', desc:'HP & Pertahanan tinggi. Cocok untuk pemula yang suka bertahan.', hpMod:10, mpMod:-3, atkMod:0, defMod:3, runBonus:0},
+    {id:'mage', name:'Penyihir Arcane', emoji:'🧙', desc:'MP besar & Bola Api mematikan, tapi HP-nya rapuh.', hpMod:-5, mpMod:10, atkMod:2, defMod:-2, runBonus:0},
+    {id:'rogue', name:'Pengembara Bayangan', emoji:'🥷', desc:'Serangan gesit & lebih sering berhasil kabur.', hpMod:0, mpMod:0, atkMod:4, defMod:-1, runBonus:0.2},
+  ];
+  let selectedCharId='knight';
+
+  // ---------------- WEAPONS ----------------
+  const WEAPONS=[
+    {name:'Pedang Kayu', bonus:0, cost:0},
+    {name:'Pedang Besi', bonus:6, cost:25},
+    {name:'Pedang Perak', bonus:14, cost:70},
+    {name:'Pedang Naga', bonus:25, cost:null},
+  ];
+
+  // ---------------- SOUND ----------------
+  let audioCtx=null, soundOn=true, musicTimer=null, musicStep=0;
+  const scale=[261.6,293.7,329.6,392.0,440.0,523.3,440.0,392.0];
+  function ensureAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; } } }
+  function beep(freq,dur,type,vol){
+    if(!soundOn || !audioCtx) return;
+    try{
+      const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain();
+      osc.type=type||'sine'; osc.frequency.value=freq;
+      gain.gain.setValueAtTime(vol||0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime+dur);
+    }catch(e){}
+  }
+  function sfxAttack(){ beep(220,0.08,'square',0.15); }
+  function sfxHit(){ beep(140,0.1,'sawtooth',0.15); }
+  function sfxHeal(){ beep(500,0.12,'sine',0.15); setTimeout(()=>beep(700,0.14,'sine',0.15),100); }
+  function sfxCoin(){ beep(880,0.08,'square',0.12); }
+  function sfxLevelUp(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.15,'sine',0.15),i*110)); }
+  function sfxVictory(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.15),i*140)); }
+  function sfxDefeat(){ [400,320,240,160].forEach((f,i)=>setTimeout(()=>beep(f,0.22,'sawtooth',0.15),i*150)); }
+  function sfxPortal(){ beep(300,0.1,'sine',0.12); setTimeout(()=>beep(600,0.12,'sine',0.12),90); }
+  function startMusic(){
+    if(musicTimer) return;
+    musicTimer=setInterval(()=>{
+      if(soundOn && audioCtx){ beep(scale[musicStep%scale.length],0.28,'triangle',0.05); }
+      musicStep++;
+    },420);
+  }
+  function stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } }
+  document.getElementById('soundBtn').addEventListener('click',()=>{
+    soundOn=!soundOn;
+    document.getElementById('soundBtn').textContent = soundOn?'🔊 Suara':'🔇 Bisu';
+  });
+
+  // ---------------- AREA BUILDERS ----------------
+  function buildVillage(){
+    const tiles=borderGrid(TILE.TREE);
+    setRect(tiles,2,2,9,7,TILE.FLOOR);
+    setRect(tiles,12,8,13,9,TILE.WATER);
+    tiles[6][17]=TILE.PORTAL;
+    return {
+      id:'village', name:'Desa Awal', tiles,
+      enemies:[],
+      chests:[ {x:3,y:7,opened:false,reward:{gold:15},msg:'Peti berisi 15 emas dari kepala desa!'} ],
+      npcs:[
+        {id:'blacksmith',x:4,y:3,emoji:'🧔',name:'Pandai Besi Ardan',type:'weaponShop',
+          lines:'"Selamat datang, pengembara! Senjata yang bagus adalah teman terbaikmu di luar sana. Mampir kapan saja kalau kau punya cukup emas."'},
+        {id:'potionseller',x:7,y:5,emoji:'🧙‍♀️',name:'Peramu Rania',type:'potionShop',
+          lines:'"Ramuanku diracik dari herbal Hutan Terlarang. Selalu bawa beberapa botol sebelum berangkat!"'},
+      ],
+      portals:[ {x:17,y:6,toArea:'forest',toX:1,toY:6} ],
+    };
+  }
+
+  function buildForest(){
+    const tiles=borderGrid(TILE.TREE);
+    setRect(tiles,4,2,10,4,TILE.TALLGRASS);
+    setRect(tiles,3,7,9,9,TILE.TALLGRASS);
+    setRect(tiles,13,3,14,4,TILE.WATER);
+    tiles[6][0]=TILE.PORTAL; tiles[6][17]=TILE.PORTAL;
+    return {
+      id:'forest', name:'Hutan Terlarang', tiles,
+      enemies:[
+        {id:1,x:6,y:3,name:'Goblin',emoji:'👹',hp:16,maxHp:16,atk:5,def:2,exp:8,gold:5,alive:true,boss:false},
+        {id:2,x:8,y:8,name:'Goblin Liar',emoji:'👹',hp:18,maxHp:18,atk:6,def:2,exp:9,gold:6,alive:true,boss:false},
+        {id:3,x:5,y:8,name:'Kelelawar',emoji:'🦇',hp:14,maxHp:14,atk:6,def:1,exp:8,gold:5,alive:true,boss:false},
+        {id:4,x:11,y:6,name:'Kelelawar Raksasa',emoji:'🦇',hp:20,maxHp:20,atk:7,def:2,exp:10,gold:7,alive:true,boss:false},
+        {id:5,x:9,y:3,name:'Laba-laba Kecil',emoji:'🕷️',hp:17,maxHp:17,atk:6,def:2,exp:9,gold:6,alive:true,boss:false},
+      ],
+      chests:[ {x:15,y:9,opened:false,reward:{potions:2,gold:8},msg:'Peti di semak-semak! +2 Ramuan, +8 emas.'} ],
+      npcs:[
+        {id:'hermit',x:13,y:8,emoji:'🧓',name:'Pertapa Tua',type:'dialog', oneTimeReward:{potions:1}, rewarded:false,
+          lines:'"Hati-hati di gua sebelah timur, anak muda... kegelapan di sana lebih pekat dari hutan ini. Ambillah ramuan ini, kau akan membutuhkannya."'},
+      ],
+      portals:[ {x:0,y:6,toArea:'village',toX:16,toY:6}, {x:17,y:6,toArea:'cave',toX:1,toY:6} ],
+    };
+  }
+
+  function buildCave(){
+    const tiles=borderGrid(TILE.ROCK);
+    setRect(tiles,2,2,15,9,TILE.CAVEGRASS);
+    setRect(tiles,7,5,9,6,TILE.ROCK);
+    tiles[6][0]=TILE.PORTAL; tiles[6][17]=TILE.PORTAL;
+    return {
+      id:'cave', name:'Gua Kegelapan', tiles,
+      enemies:[
+        {id:1,x:4,y:3,name:'Laba-laba Gua',emoji:'🕷️',hp:26,maxHp:26,atk:8,def:4,exp:15,gold:10,alive:true,boss:false},
+        {id:2,x:12,y:3,name:'Serigala Bayangan',emoji:'🐺',hp:30,maxHp:30,atk:9,def:4,exp:17,gold:12,alive:true,boss:false},
+        {id:3,x:4,y:8,name:'Ksatria Gelap',emoji:'🥷',hp:34,maxHp:34,atk:10,def:5,exp:20,gold:15,alive:true,boss:false},
+        {id:4,x:11,y:8,name:'Ksatria Gelap',emoji:'🥷',hp:34,maxHp:34,atk:10,def:5,exp:20,gold:15,alive:true,boss:false},
+        {id:5,x:8,y:3,name:'Troll Gua',emoji:'👺',hp:45,maxHp:45,atk:11,def:6,exp:25,gold:18,alive:true,boss:false},
+      ],
+      chests:[ {x:14,y:3,opened:false,reward:{weapon:'Pedang Perak',gold:0},msg:'Peti berkilau berisi Pedang Perak!'} ],
+      npcs:[
+        {id:'gateguard',x:3,y:6,emoji:'💂',name:'Penjaga Gerbang',type:'dialog',
+          lines:'"Aku pernah menjaga gerbang ini bersama pasukan kerajaan... sekarang tinggal aku sendiri. Naga Kegelapan ada di ujung gua ini. Semoga dewa melindungimu."'},
+      ],
+      portals:[ {x:0,y:6,toArea:'forest',toX:16,toY:6}, {x:17,y:6,toArea:'lair',toX:1,toY:6} ],
+    };
+  }
+
+  function buildLair(){
+    const tiles=borderGrid(TILE.ROCK);
+    setRect(tiles,2,2,15,9,TILE.CAVEGRASS);
+    tiles[6][0]=TILE.PORTAL;
+    return {
+      id:'lair', name:'Sarang Naga', tiles,
+      enemies:[
+        {id:1,x:6,y:3,name:'Prajurit Bayangan',emoji:'🥷',hp:40,maxHp:40,atk:11,def:6,exp:22,gold:15,alive:true,boss:false},
+        {id:2,x:6,y:9,name:'Prajurit Bayangan',emoji:'🥷',hp:40,maxHp:40,atk:11,def:6,exp:22,gold:15,alive:true,boss:false},
+        {id:3,x:14,y:6,name:'Naga Kegelapan',emoji:'🐉',hp:90,maxHp:90,atk:13,def:7,exp:150,gold:60,alive:true,boss:true},
+      ],
+      chests:[ {x:10,y:6,opened:false,reward:{weapon:'Pedang Naga',gold:0},msg:'Peti terakhir menyimpan Pedang Naga legendaris!'} ],
+      npcs:[
+        {id:'fairy',x:3,y:6,emoji:'🧚',name:'Peri Terperangkap',type:'heal', used:false,
+          lines:'"Kau membebaskanku dari kutukan naga... biar kubalas dengan memulihkan kekuatanmu sepenuhnya sebelum kau menghadapinya!"'},
+      ],
+      portals:[ {x:0,y:6,toArea:'cave',toX:16,toY:6} ],
+    };
+  }
+
+  function buildWorld(){
+    return { village:buildVillage(), forest:buildForest(), cave:buildCave(), lair:buildLair() };
+  }
+  let world=buildWorld();
+  let currentAreaId='village';
+  function getArea(){ return world[currentAreaId]; }
+
+  // ---------------- PLAYER ----------------
+  function freshPlayer(charId){
+    const c=CHARACTERS.find(c=>c.id===charId) || CHARACTERS[0];
+    return {
+      x:4,y:5,level:1,
+      hp:30+c.hpMod, maxHp:30+c.hpMod,
+      mp:10+c.mpMod, maxMp:10+c.mpMod,
+      baseAtk:8+c.atkMod, def:4+c.defMod,
+      exp:0, expToNext:20, gold:10, potions:2,
+      weaponName:'Pedang Kayu', weaponBonus:0,
+      charId:c.id, emoji:c.emoji, runBonus:c.runBonus||0,
+    };
+  }
+  let player=freshPlayer();
+  function totalAtk(){ return player.baseAtk+player.weaponBonus; }
+  let inBattle=false, currentEnemy=null, canMove=true;
+
+  // ---------------- DOM refs ----------------
+  const lvlEl=document.getElementById('lvl'), hpFill=document.getElementById('hpFill'), hpText=document.getElementById('hpText');
+  const mpFill=document.getElementById('mpFill'), mpText=document.getElementById('mpText');
+  const goldEl=document.getElementById('gold'), potionsEl=document.getElementById('potions'), weaponNameEl=document.getElementById('weaponName');
+  const areaLabel=document.getElementById('areaLabel');
+  const msgLog=document.getElementById('msgLog');
+  const startOverlay=document.getElementById('startOverlay');
+  const dialogOverlay=document.getElementById('dialogOverlay');
+  const battleOverlay=document.getElementById('battleOverlay');
+  const potionShopOverlay=document.getElementById('potionShopOverlay');
+  const weaponShopOverlay=document.getElementById('weaponShopOverlay');
+  const gameOverOverlay=document.getElementById('gameOverOverlay');
+  const winOverlay=document.getElementById('winOverlay');
+  const battleLog=document.getElementById('battleLog');
+  const enemyEmoji=document.getElementById('enemyEmoji'), enemyName=document.getElementById('enemyName');
+  const enemyHpFill=document.getElementById('enemyHpFill'), enemyHpText=document.getElementById('enemyHpText');
+
+  function log(msg){ msgLog.textContent=msg; }
+  function blog(msg){ const p=document.createElement('div'); p.textContent=msg; battleLog.appendChild(p); battleLog.scrollTop=battleLog.scrollHeight; }
+  function anyOverlayOpen(){
+    return [dialogOverlay,potionShopOverlay,weaponShopOverlay,gameOverOverlay,winOverlay,startOverlay,charSelectOverlay].some(o=>o.style.display==='flex');
+  }
+
+  function updateHud(){
+    lvlEl.textContent=player.level;
+    hpFill.style.width=(player.hp/player.maxHp*100)+'%';
+    hpText.textContent=`${Math.max(0,player.hp)}/${player.maxHp}`;
+    mpFill.style.width=(player.mp/player.maxMp*100)+'%';
+    mpText.textContent=`${player.mp}/${player.maxMp}`;
+    goldEl.textContent=player.gold;
+    potionsEl.textContent=player.potions;
+    weaponNameEl.textContent=player.weaponName;
+    areaLabel.textContent='📍 '+getArea().name;
+    const c=CHARACTERS.find(c=>c.id===player.charId);
+    document.getElementById('charLabel').textContent = c ? '('+c.name+')' : '';
+  }
+
+  // ---------------- RENDER ----------------
+  let t0=performance.now();
+  function render(now){
+    const area=getArea();
+    const pulse=Math.sin((now-t0)/300)*0.5+0.5;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let y=0;y<ROWS;y++){
+      for(let x=0;x<COLS;x++){
+        const t=area.tiles[y][x];
+        ctx.fillStyle=tileColor[t];
+        ctx.fillRect(x*TS,y*TS,TS,TS);
+        ctx.font='20px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        if(t===TILE.TREE) ctx.fillText('🌲',x*TS+TS/2,y*TS+TS/2+2);
+        else if(t===TILE.WATER) ctx.fillText('〰️',x*TS+TS/2,y*TS+TS/2+2);
+        else if(t===TILE.ROCK) ctx.fillText('⛰️',x*TS+TS/2,y*TS+TS/2+2);
+        else if(t===TILE.PORTAL) ctx.fillText('🌀',x*TS+TS/2,y*TS+TS/2+2+Math.sin((now-t0)/200)*2);
+      }
+    }
+    area.chests.forEach(c=>{
+      if(!c.opened){ ctx.font=(20+pulse*3)+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('📦',c.x*TS+TS/2,c.y*TS+TS/2+2); }
+    });
+    area.npcs.forEach(n=>{
+      ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(n.emoji,n.x*TS+TS/2,n.y*TS+TS/2+2);
+    });
+    area.enemies.forEach(e=>{
+      if(e.alive){
+        ctx.font=(e.boss?26:20)+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        const bob=Math.sin((now-t0)/250+e.id)*2;
+        ctx.fillText(e.emoji,e.x*TS+TS/2,e.y*TS+TS/2+2+bob);
+      }
+    });
+    ctx.font='24px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(player.emoji||'🤺',player.x*TS+TS/2,player.y*TS+TS/2+2);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+
+  // ---------------- MOVEMENT ----------------
+  function tryMove(dx,dy){
+    if(!canMove||inBattle||anyOverlayOpen()) return;
+    const area=getArea();
+    const nx=player.x+dx, ny=player.y+dy;
+    if(nx<0||ny<0||nx>=COLS||ny>=ROWS) return;
+    const npc=area.npcs.find(n=>n.x===nx&&n.y===ny);
+    if(npc){ interactNpc(npc); return; }
+    const tile=area.tiles[ny][nx];
+    if(tile===TILE.TREE||tile===TILE.WATER||tile===TILE.ROCK) return;
+    const enemy=area.enemies.find(e=>e.alive && e.x===nx && e.y===ny);
+    if(enemy){ startBattle(enemy); return; }
+    const chest=area.chests.find(c=>!c.opened && c.x===nx && c.y===ny);
+    player.x=nx; player.y=ny;
+    if(chest){ openChest(chest); }
+    else if(tile===TILE.PORTAL){ usePortal(area,nx,ny); }
+    else { log('Menjelajahi '+area.name+'...'); }
+    updateHud();
+    canMove=false; setTimeout(()=>canMove=true,130);
+  }
+
+  window.addEventListener('keydown',(ev)=>{
+    if(inBattle||anyOverlayOpen()) return;
+    const k=ev.key.toLowerCase();
+    if(k==='arrowup'||k==='w') tryMove(0,-1);
+    else if(k==='arrowdown'||k==='s') tryMove(0,1);
+    else if(k==='arrowleft'||k==='a') tryMove(-1,0);
+    else if(k==='arrowright'||k==='d') tryMove(1,0);
+  });
+
+  function openChest(chest){
+    chest.opened=true;
+    if(chest.reward.potions) player.potions+=chest.reward.potions;
+    if(chest.reward.gold) player.gold+=chest.reward.gold;
+    if(chest.reward.heal){ player.hp=player.maxHp; player.mp=player.maxMp; }
+    if(chest.reward.weapon) equipWeaponByName(chest.reward.weapon);
+    sfxCoin();
+    log(chest.msg);
+    updateHud();
+  }
+
+  function usePortal(area,x,y){
+    const portal=area.portals.find(p=>p.x===x&&p.y===y);
+    if(!portal) return;
+    sfxPortal();
+    currentAreaId=portal.toArea;
+    player.x=portal.toX; player.y=portal.toY;
+    log('Kamu memasuki '+world[currentAreaId].name+'...');
+    updateHud();
+  }
+
+  function equipWeaponByName(name){
+    const w=WEAPONS.find(w=>w.name===name);
+    if(w && w.bonus>player.weaponBonus){
+      player.weaponName=w.name; player.weaponBonus=w.bonus;
+      log('Kamu melengkapi '+w.name+'!');
+    }
+  }
+
+  // ---------------- NPC INTERACTION ----------------
+  function interactNpc(npc){
+    if(npc.type==='weaponShop'){ openWeaponShop(); return; }
+    if(npc.type==='potionShop'){ openPotionShop(); return; }
+    if(npc.type==='heal'){
+      if(!npc.used){
+        npc.used=true; player.hp=player.maxHp; player.mp=player.maxMp;
+        sfxHeal(); updateHud();
+        showDialog(npc.name, npc.lines+'\n\n(HP dan MP kamu dipulihkan sepenuhnya!)');
+      } else {
+        showDialog(npc.name, '"Semoga keberuntungan menyertaimu, pahlawan."');
+      }
+      return;
+    }
+    // dialog
+    let text=npc.lines;
+    if(npc.oneTimeReward && !npc.rewarded){
+      npc.rewarded=true;
+      if(npc.oneTimeReward.potions) player.potions+=npc.oneTimeReward.potions;
+      if(npc.oneTimeReward.gold) player.gold+=npc.oneTimeReward.gold;
+      text+='\n\n(Kamu menerima hadiah dari '+npc.name+'!)';
+      updateHud();
+    }
+    showDialog(npc.name, text);
+  }
+  function showDialog(name,text){
+    document.getElementById('dialogName').textContent=name;
+    document.getElementById('dialogText').textContent=text;
+    dialogOverlay.style.display='flex';
+  }
+  document.getElementById('dialogCloseBtn').addEventListener('click',()=>{ dialogOverlay.style.display='none'; });
+
+  // ---------------- SHOPS ----------------
+  function openPotionShop(){
+    potionShopOverlay.style.display='flex';
+    document.getElementById('pShopGold').textContent=player.gold;
+    document.getElementById('pShopPotions').textContent=player.potions;
+  }
+  document.getElementById('buyPotionBtn').addEventListener('click',()=>{
+    if(player.gold>=8){ player.gold-=8; player.potions++; sfxCoin(); updateHud();
+      document.getElementById('pShopGold').textContent=player.gold;
+      document.getElementById('pShopPotions').textContent=player.potions;
+    }
+  });
+  document.getElementById('closePotionShopBtn').addEventListener('click',()=>{ potionShopOverlay.style.display='none'; });
+
+  function openWeaponShop(){
+    weaponShopOverlay.style.display='flex';
+    document.getElementById('wShopGold').textContent=player.gold;
+    document.getElementById('wShopCurrent').textContent=player.weaponName;
+    const list=document.getElementById('weaponList');
+    list.innerHTML='';
+    WEAPONS.filter(w=>w.cost!==null && w.bonus>player.weaponBonus).forEach(w=>{
+      const row=document.createElement('div');
+      row.className='shopItem';
+      row.innerHTML=`<span>${w.name} (+${w.bonus} ATK)</span>`;
+      const btn=document.createElement('button');
+      btn.textContent=`Beli (${w.cost}💰)`;
+      btn.disabled=player.gold<w.cost;
+      btn.addEventListener('click',()=>{
+        if(player.gold>=w.cost){
+          player.gold-=w.cost; equipWeaponByName(w.name); sfxCoin(); updateHud(); openWeaponShop();
+        }
+      });
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+    if(list.innerHTML===''){ list.innerHTML='<p style="font-size:13px;color:#666;">Kamu sudah memiliki senjata terbaik yang kujual!</p>'; }
+  }
+  document.getElementById('closeWeaponShopBtn').addEventListener('click',()=>{ weaponShopOverlay.style.display='none'; });
+
+  // ---------------- BATTLE ----------------
+  function startBattle(enemy){
+    inBattle=true; currentEnemy=enemy;
+    battleOverlay.style.display='flex';
+    battleLog.innerHTML='';
+    document.getElementById('battleTitle').textContent=enemy.boss?'👑 Pertarungan Terakhir!':'Pertarungan!';
+    enemyEmoji.textContent=enemy.emoji;
+    enemyName.textContent=enemy.name;
+    updateEnemyBar();
+    blog(`${enemy.name} muncul di hadapanmu!`);
+    document.getElementById('btnRun').disabled=enemy.boss;
+  }
+  function updateEnemyBar(){
+    enemyHpFill.style.width=(Math.max(0,currentEnemy.hp)/currentEnemy.maxHp*100)+'%';
+    enemyHpText.textContent=`${Math.max(0,currentEnemy.hp)}/${currentEnemy.maxHp}`;
+  }
+  function dmg(atk,def){ const base=Math.max(1,atk-def*0.5); const v=base*0.25; return Math.round(base+rand(-v,v)); }
+
+  function playerTurn(action){
+    if(!inBattle) return;
+    const e=currentEnemy;
+    if(action==='attack'){
+      const d=dmg(totalAtk(),e.def); e.hp-=d; sfxAttack();
+      blog(`Kamu menyerang ${e.name} sebesar ${d} damage!`);
+    } else if(action==='skill'){
+      if(player.mp<8){ blog('MP tidak cukup!'); return; }
+      player.mp-=8;
+      const d=Math.round(Math.max(1,totalAtk()*1.6-e.def*0.3)); e.hp-=d; sfxAttack();
+      blog(`🔥 Bola Api menghantam ${e.name} sebesar ${d} damage!`);
+    } else if(action==='item'){
+      if(player.potions<=0){ blog('Kamu tidak punya ramuan!'); return; }
+      player.potions--; player.hp=Math.min(player.maxHp,player.hp+15); sfxHeal();
+      blog('Kamu minum ramuan, memulihkan 15 HP.');
+    } else if(action==='run'){
+      if(Math.random()<0.5+(player.runBonus||0)){ blog('Kamu berhasil kabur!'); endBattle(); return; }
+      else blog('Gagal kabur!');
+    }
+    updateEnemyBar(); updateHud();
+    if(e.hp<=0){ winBattle(); return; }
+    setTimeout(enemyTurn,500);
+  }
+
+  function enemyTurn(){
+    if(!inBattle) return;
+    const e=currentEnemy;
+    let mult=1;
+    if(e.boss && Math.random()<0.2){ mult=1.8; blog('🐉 Naga melancarkan Serangan Ganas!'); }
+    const d=Math.round(dmg(e.atk,player.def)*mult);
+    player.hp-=d; sfxHit();
+    blog(`${e.name} menyerangmu sebesar ${d} damage!`);
+    updateHud();
+    if(player.hp<=0){ loseBattle(); return; }
+  }
+
+  function winBattle(){
+    const e=currentEnemy;
+    blog(`${e.name} dikalahkan! +${e.exp} EXP, +${e.gold} emas.`);
+    e.alive=false;
+    player.exp+=e.exp; player.gold+=e.gold;
+    let leveledUp=false;
+    while(player.exp>=player.expToNext){
+      player.exp-=player.expToNext; player.level++;
+      player.maxHp+=10; player.maxMp+=5; player.baseAtk+=3; player.def+=2;
+      player.hp=player.maxHp; player.mp=player.maxMp;
+      player.expToNext=player.level*20; leveledUp=true;
+    }
+    if(leveledUp){ blog(`✨ Naik level! Sekarang Level ${player.level}.`); sfxLevelUp(); }
+    updateHud();
+    if(e.boss){
+      sfxVictory();
+      setTimeout(()=>{
+        battleOverlay.style.display='none'; inBattle=false;
+        document.getElementById('finalLvl').textContent='Level '+player.level;
+        document.getElementById('finalGold').textContent=player.gold;
+        document.getElementById('finalWeapon').textContent=player.weaponName;
+        winOverlay.style.display='flex'; stopMusic();
+      },900);
+    } else { setTimeout(()=>endBattle(),900); }
+  }
+
+  function loseBattle(){
+    blog('Kamu kehabisan HP...'); sfxDefeat();
+    setTimeout(()=>{ battleOverlay.style.display='none'; inBattle=false; gameOverOverlay.style.display='flex'; stopMusic(); },700);
+  }
+  function endBattle(){ battleOverlay.style.display='none'; inBattle=false; currentEnemy=null; log('Kamu melanjutkan perjalanan.'); }
+
+  document.getElementById('btnAttack').addEventListener('click',()=>playerTurn('attack'));
+  document.getElementById('btnSkill').addEventListener('click',()=>playerTurn('skill'));
+  document.getElementById('btnItem').addEventListener('click',()=>playerTurn('item'));
+  document.getElementById('btnRun').addEventListener('click',()=>playerTurn('run'));
+
+  // ---------------- SAVE / LOAD ----------------
+  function serializeState(){
+    const areasState={};
+    Object.keys(world).forEach(id=>{
+      const a=world[id];
+      areasState[id]={
+        enemies:a.enemies.map(e=>({id:e.id,alive:e.alive})),
+        chests:a.chests.map(c=>c.opened),
+        npcs:a.npcs.map(n=>({id:n.id,rewarded:!!n.rewarded,used:!!n.used})),
+      };
+    });
+    return { player, currentAreaId, areasState };
+  }
+  function applyState(state){
+    world=buildWorld();
+    Object.assign(player, state.player);
+    currentAreaId=state.currentAreaId||'village';
+    Object.keys(state.areasState||{}).forEach(id=>{
+      const saved=state.areasState[id]; const a=world[id];
+      if(!a) return;
+      (saved.enemies||[]).forEach(se=>{ const e=a.enemies.find(x=>x.id===se.id); if(e) e.alive=se.alive; });
+      (saved.chests||[]).forEach((opened,idx)=>{ if(a.chests[idx]) a.chests[idx].opened=opened; });
+      (saved.npcs||[]).forEach(sn=>{ const n=a.npcs.find(x=>x.id===sn.id); if(n){ n.rewarded=sn.rewarded; n.used=sn.used; } });
+    });
+  }
+  async function saveGame(){
+    try{
+      const data=JSON.stringify(serializeState());
+      const result=await window.storage.set('savegame', data, false);
+      log(result ? '💾 Permainan tersimpan!' : 'Gagal menyimpan permainan.');
+    }catch(e){ log('Gagal menyimpan permainan.'); }
+  }
+  async function loadGame(fromStart){
+    try{
+      const result=await window.storage.get('savegame', false);
+      if(result && result.value){
+        applyState(JSON.parse(result.value));
+        updateHud();
+        log('📂 Permainan dimuat!');
+        return true;
+      } else {
+        log('Tidak ada data tersimpan.');
+        return false;
+      }
+    }catch(e){ log('Tidak ada data tersimpan.'); return false; }
+  }
+  document.getElementById('saveBtn').addEventListener('click',saveGame);
+  document.getElementById('loadBtn').addEventListener('click',()=>loadGame(false));
+
+  // ---------------- START / RESTART ----------------
+  function resetGame(charId){
+    player=freshPlayer(charId||selectedCharId); world=buildWorld(); currentAreaId='village';
+    inBattle=false; currentEnemy=null; updateHud();
+    log('Selamat datang, '+ (CHARACTERS.find(c=>c.id===player.charId)||{}).name +'!');
+  }
+
+  const charSelectOverlay=document.getElementById('charSelectOverlay');
+  function renderCharSelect(){
+    const grid=document.getElementById('charGrid');
+    grid.innerHTML='';
+    CHARACTERS.forEach(c=>{
+      const card=document.createElement('div');
+      card.className='charCard';
+      card.innerHTML=`<span class="emoji-big">${c.emoji}</span><h3>${c.name}</h3><p>${c.desc}</p>`;
+      card.addEventListener('click',()=>{
+        selectedCharId=c.id;
+        ensureAudio();
+        resetGame(c.id);
+        charSelectOverlay.style.display='none';
+        startMusic();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('newGameBtn').addEventListener('click',()=>{
+    startOverlay.style.display='none';
+    renderCharSelect();
+    charSelectOverlay.style.display='flex';
+  });
+  document.getElementById('continueBtn').addEventListener('click', async ()=>{
+    ensureAudio();
+    const ok=await loadGame(true);
+    if(!ok){
+      startOverlay.style.display='none';
+      renderCharSelect();
+      charSelectOverlay.style.display='flex';
+      return;
+    }
+    startOverlay.style.display='none'; startMusic();
+  });
+  document.getElementById('retryBtn').addEventListener('click',()=>{ resetGame(); gameOverOverlay.style.display='none'; startMusic(); });
+  document.getElementById('playAgainBtn').addEventListener('click',()=>{ resetGame(); winOverlay.style.display='none'; startMusic(); });
+
+  updateHud();
+})();
+</script>
+</body>
+</html>
