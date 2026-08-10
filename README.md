@@ -70,10 +70,9 @@ Berikut adalah website yang telah saya buat menggunakan HTML dan CSS.
 | 4  | Company Profile Website      | ✅ Completed |
 | 5  | Website Cafe / Coffee Shop   | ✅ Completed |
 | 6  | Website Travel Agency        | ✅ Completed |
-| 7  | Website Hotel                | ✅ Completed |
-| 8  | Website Gym / Fitness Center | ✅ Completed |
-| 9  | Website Sekolah              | ✅ Completed |
-| 10 | Website E-Commerce Sederhana | ✅ Completed |
+| 7  | Website Gym / Fitness Center | ✅ Completed |
+| 8  | Website Sekolah              | ✅ Completed |
+| 9  | Website E-Commerce Sederhana | ✅ Completed |
 
 ### Skills yang dipelajari
 
